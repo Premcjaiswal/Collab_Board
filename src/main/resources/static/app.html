@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CollabBoard</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#content">Skip to content</a>
+<div class="app" id="app">
+  <nav class="sidebar" id="sidebar" aria-label="Main navigation">
+    <a class="brand" href="#/dashboard"><img src="/img/logo.svg" alt=""> CollabBoard</a>
+    <span class="role-chip" id="role-chip"></span>
+    <div class="nav" id="nav"></div>
+    <div class="nav-spacer"></div>
+    <div class="nav nav-bottom">
+      <button type="button" class="nav-link" id="logout-btn"></button>
+    </div>
+  </nav>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <div class="main">
+    <header class="topbar">
+      <button type="button" class="btn btn-secondary btn-icon menu-toggle" id="menu-toggle" aria-label="Open menu" aria-controls="sidebar" aria-expanded="false"></button>
+      <div class="page-title" id="page-title">Loading…</div>
+      <a class="btn btn-ghost btn-icon bell" id="bell" href="#/notifications" aria-label="Notifications"></a>
+      <a class="user-chip" id="user-chip" href="#/profile"></a>
+    </header>
+    <main class="content" id="content" tabindex="-1">
+      <div class="loading" role="status"><span class="spinner"></span>Loading…</div>
+    </main>
+  </div>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/pages/common.js"></script>
+<script src="/js/pages/student.js"></script>
+<script src="/js/pages/teacher.js"></script>
+<script src="/js/boot.js"></script>
+</body>
+</html>

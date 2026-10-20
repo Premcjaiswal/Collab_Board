@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify email · CollabBoard</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body data-page="verify">
+<main class="auth-main" id="main">
+  <div class="auth-card">
+    <p><a class="brand" href="/"><img src="/img/logo.svg" alt=""> CollabBoard</a></p>
+    <div class="card">
+      <h1>Verify your email</h1>
+      <p class="muted">Enter the 6-digit code we emailed to your college address. Codes expire after a few minutes and can be used once.</p>
+      <form id="verify-form" class="form" novalidate>
+        <div id="flash" class="alert alert-info" role="status" hidden></div>
+        <div class="alert alert-error form-alert" role="alert" hidden></div>
+        <div class="field" data-field="email">
+          <label for="email" class="req">College email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required>
+          <div class="error"></div>
+        </div>
+        <div class="field" data-field="code">
+          <label for="code" class="req">Verification code</label>
+          <input id="code" name="code" class="otp-input" type="text" inputmode="numeric" autocomplete="one-time-code"
+                 pattern="[0-9]{6}" maxlength="6" required>
+          <div class="error"></div>
+        </div>
+        <button type="submit" class="btn btn-block">Verify email</button>
+        <div class="row between small">
+          <button type="button" class="btn btn-ghost btn-sm" id="resend-btn">Resend code</button>
+          <a href="/">Back to sign in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+<script src="/js/api.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/auth.js"></script>
+</body>
+</html>

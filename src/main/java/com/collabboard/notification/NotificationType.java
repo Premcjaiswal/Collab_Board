@@ -1,0 +1,16 @@
+package com.collabboard.notification;
+
+public enum NotificationType {
+    ACCOUNT,
+    CLASS_ENROLLMENT,
+    NEW_ASSIGNMENT,
+    NEW_PROJECT,
+    DEADLINE_REMINDER,
+    TEAM_INVITATION,
+    INVITATION_RESPONSE,
+    TEAM_UPDATE,
+    SUBMISSION,
+    REVISION_REQUESTED,
+    SUBMISSION_REJECTED,
+    EVALUATION_PUBLISHED
+}

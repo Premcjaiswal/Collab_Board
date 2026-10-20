@@ -1,0 +1,37 @@
+# Build output
+target/
+*.class
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.env.local
+application-local.yml
+*.pem
+*.key
+*.p12
+*.jks
+
+# Uploaded user data, local databases and dumps
+data/
+uploads/
+*.log
+logs/
+*.sql.gz
+*.dump
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+.DS_Store
+Thumbs.db
+# Local editor-extension state (not part of the project)
+.github/modernize/
+
+# Local setup scripts containing generated credentials
+local-setup/

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · CollabBoard</title>
+  <link rel="icon" href="/img/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body data-page="login">
+<div class="auth-body">
+  <aside class="auth-aside">
+    <a class="brand" href="/"><img src="/img/logo.svg" alt=""> CollabBoard</a>
+    <div>
+      <h1>Assignments, projects and evaluation — in one place.</h1>
+      <p>CollabBoard is your college's portal for submitting assignments, collaborating on group projects and receiving marks and feedback.</p>
+      <ul>
+        <li>Join classes with a code from your teacher</li>
+        <li>Submit individual assignments and track deadlines</li>
+        <li>Work on group projects in a shared team workspace</li>
+        <li>Receive rubric-based marks and written feedback</li>
+      </ul>
+    </div>
+    <p class="small">Use your college email address to sign in.</p>
+  </aside>
+  <main class="auth-main" id="main">
+    <div class="auth-card">
+      <div class="card">
+        <h1>Sign in</h1>
+        <p class="muted">Choose your portal and sign in with your verified college email.</p>
+        <div class="segmented" role="group" aria-label="Account type" id="role-toggle">
+          <button type="button" data-role="STUDENT" aria-pressed="true">Student</button>
+          <button type="button" data-role="TEACHER" aria-pressed="false">Teacher</button>
+        </div>
+        <form id="login-form" class="form" novalidate>
+          <div id="flash" class="alert alert-success" role="status" hidden></div>
+          <div class="alert alert-error form-alert" role="alert" hidden></div>
+          <div class="field" data-field="email">
+            <label for="email" class="req">College email</label>
+            <input id="email" name="email" type="email" autocomplete="username" required>
+            <div class="error"></div>
+          </div>
+          <div class="field" data-field="password">
+            <label for="password" class="req">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+            <div class="error"></div>
+          </div>
+          <div id="verify-help" class="alert alert-warning" hidden>
+            Your email is not verified yet. <a href="/verify.html" id="verify-link">Enter your verification code</a>.
+          </div>
+          <button type="submit" class="btn btn-block" id="login-btn">Sign in as student</button>
+          <div class="row between small">
+            <a href="/forgot-password.html">Forgot password?</a>
+            <a href="/register.html" id="register-link">Create a student account</a>
+          </div>
+        </form>
+      </div>
+      <p class="auth-footer">New here? Students and teachers register separately using their college email.</p>
+    </div>
+  </main>
+</div>
+<script src="/js/api.js"></script>
+<script src="/js/ui.js"></script>
+<script src="/js/auth.js"></script>
+</body>
+</html>
