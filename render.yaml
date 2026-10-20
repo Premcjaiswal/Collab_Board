@@ -1,0 +1,58 @@
+# Render Blueprint for CollabBoard (free web service, Docker runtime).
+# Values marked "sync: false" are secrets or account-specific: Render asks for them in its dashboard and they are
+# never stored in this repository. MySQL is external (e.g. Aiven free); email uses Brevo's HTTPS API because
+# Render's free tier blocks outbound SMTP; uploads are kept in MySQL because free services have no persistent disk.
+services:
+  - type: web
+    name: collabboard
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/auth/csrf
+    autoDeploy: false
+    envVars:
+      # Database (Aiven MySQL). DB_URL example:
+      # jdbc:mysql://<host>:<port>/defaultdb?sslMode=REQUIRED&serverTimezone=UTC&characterEncoding=UTF-8
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: "5"
+      # Public URL and security
+      - key: APP_BASE_URL
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: FORWARD_HEADERS_STRATEGY
+        value: native
+      - key: OTP_SECRET
+        generateValue: true
+      # Email (Brevo HTTPS API)
+      - key: MAIL_ENABLED
+        value: "true"
+      - key: MAIL_TRANSPORT
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: MAIL_FROM_NAME
+        value: CollabBoard
+      - key: MAIL_LOG_CODES
+        value: "false"
+      # Uploads kept in MySQL; the local path only holds temp files during validation
+      - key: STORAGE_TYPE
+        value: database
+      - key: STORAGE_ROOT
+        value: /app/data/uploads
+      - key: MAX_UPLOAD_FILE_SIZE
+        value: 10MB
+      - key: MAX_UPLOAD_REQUEST_SIZE
+        value: 25MB
+      # Small instance tuning
+      - key: SERVER_TOMCAT_THREADS_MAX
+        value: "20"

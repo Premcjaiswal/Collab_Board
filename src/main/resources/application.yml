@@ -45,7 +45,10 @@ spring:
           writetimeout: 10000
 
 server:
-  port: ${SERVER_PORT:8080}
+  # SERVER_PORT locally; hosting platforms such as Render provide PORT.
+  port: ${SERVER_PORT:${PORT:8080}}
+  # "native" behind a hosting platform's proxy so the real client IP is used (login lockout); none locally.
+  forward-headers-strategy: ${FORWARD_HEADERS_STRATEGY:none}
   error:
     include-stacktrace: never
     include-message: never
@@ -68,6 +71,9 @@ app:
     from-name: ${MAIL_FROM_NAME:CollabBoard}
     # DEVELOPMENT ONLY: writes one-time codes to the application log when mail is disabled.
     log-codes: ${MAIL_LOG_CODES:false}
+    # smtp (default) or brevo: HTTPS email API for hosts that block outbound SMTP (e.g. Render free).
+    transport: ${MAIL_TRANSPORT:smtp}
+    brevo-api-key: ${BREVO_API_KEY:}
   security:
     # Secret key used to HMAC one-time codes before storing them. Must be set in production.
     otp-secret: ${OTP_SECRET:}
@@ -84,6 +90,8 @@ app:
     teacher-email-domains: ${TEACHER_EMAIL_DOMAINS:}
   storage:
     root: ${STORAGE_ROOT:./data/uploads}
+    # filesystem (default) or database: keep file contents in MySQL on hosts without a persistent disk.
+    type: ${STORAGE_TYPE:filesystem}
 
 logging:
   level:

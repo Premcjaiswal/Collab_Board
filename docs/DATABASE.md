@@ -1,8 +1,8 @@
 # Database design
 
 - **DBMS:** MySQL 8 (InnoDB, utf8mb4).
-- **Migrations:** Flyway, in `src/main/resources/db/migration`. The schema is created by `V1__init_schema.sql`; `V2__team_join_codes.sql` adds the nullable, unique `teams.join_code` (existing student-created teams get a code at startup).
-- **Never edit an applied migration.** Add the next version (`V3__description.sql`, ...) instead.
+- **Migrations:** Flyway, in `src/main/resources/db/migration`. The schema is created by `V1__init_schema.sql`; `V2__team_join_codes.sql` adds the nullable, unique `teams.join_code` (existing student-created teams get a code at startup); `V3__file_blobs.sql` adds `file_blobs`, which holds file contents only when `STORAGE_TYPE=database` and stays empty otherwise.
+- **Never edit an applied migration.** Add the next version (`V4__description.sql`, ...) instead.
 - On startup Hibernate only *validates* the schema (`ddl-auto: validate`); it never changes tables.
 - All timestamps are stored as `DATETIME(6)` in UTC.
 

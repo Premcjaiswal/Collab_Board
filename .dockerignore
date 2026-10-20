@@ -1,0 +1,14 @@
+# Keep secrets, local data and build output out of the Docker build context and image.
+.env
+.env.*
+!.env.example
+local-setup/
+data/
+uploads/
+target/
+*.log
+.git/
+.github/
+.idea/
+.vscode/
+*.iml

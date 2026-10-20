@@ -53,7 +53,7 @@ FLUSH PRIVILEGES;
 Run this as the MySQL root user, for example with `mysql -u root -p`.
 
 You do **not** need to create any tables. On startup, Flyway applies the migrations in
-`src/main/resources/db/migration` (currently `V1__init_schema.sql` and `V2__team_join_codes.sql`). Hibernate then checks that the entities match the
+`src/main/resources/db/migration` (currently `V1__init_schema.sql`, `V2__team_join_codes.sql` and `V3__file_blobs.sql`). Hibernate then checks that the entities match the
 schema (`ddl-auto: validate`).
 
 ## 3. Configuration (environment variables)
@@ -80,6 +80,11 @@ Then edit `.env`. The most important settings:
 | `COOKIE_SECURE` | `true` when served over HTTPS | `false` |
 | `STORAGE_ROOT` | Folder for uploaded files. Keep it outside the web root. | `./data/uploads` |
 | `MAIL_LOG_CODES` | **Development only:** when mail is disabled, print one-time codes to the log | `false` |
+| `MAIL_TRANSPORT` | `smtp` (Gmail etc.) or `brevo` (HTTPS email API, for hosts that block outbound SMTP) | `smtp` |
+| `BREVO_API_KEY` | Brevo API key, only used when `MAIL_TRANSPORT=brevo` | *(empty)* |
+| `STORAGE_TYPE` | `filesystem` (files under `STORAGE_ROOT`) or `database` (file contents in MySQL, for hosts without a persistent disk) | `filesystem` |
+| `FORWARD_HEADERS_STRATEGY` | `native` when running behind a hosting platform's proxy (real client IP for the login lockout, HTTPS detection) | `none` |
+| `PORT` | Used when `SERVER_PORT` is not set (hosting platforms set it) | *(unset)* |
 
 `.env.example` lists every setting, including OTP expiry and attempt limits, the resend cooldown, the login lockout
 and upload size limits.
@@ -91,6 +96,9 @@ openssl rand -hex 32
 ```
 
 ## 4. Email (Gmail SMTP with an App Password)
+
+> On hosts that block outbound SMTP (such as Render's free tier), set `MAIL_TRANSPORT=brevo` and `BREVO_API_KEY`
+> instead; see [Deploying to Render](#10-deploying-to-render-free-tier).
 
 Verification and password-reset codes are emailed from **collabboard.verify@gmail.com**. Gmail will **not** accept the
 normal account password over SMTP. You need an **App Password**:
@@ -222,7 +230,7 @@ docs/            API, database and architecture documentation
 | `Access denied for user 'collabboard'@'localhost'` | Wrong `DB_USERNAME`/`DB_PASSWORD`, or the GRANT was not run. Re-run the SQL in section 2. |
 | `Public Key Retrieval is not allowed` | Keep `allowPublicKeyRetrieval=true` in `DB_URL` for local, non-SSL connections, or set up SSL. |
 | `Schema-validation: missing table ...` | The database was changed by hand. Use an empty database so Flyway can create the schema. |
-| Flyway `Validate failed: Migrations have failed validation` | A migration file was edited after it was applied. Revert the edit and add a new migration (`V3__...sql`) instead. |
+| Flyway `Validate failed: Migrations have failed validation` | A migration file was edited after it was applied. Revert the edit and add a new migration (`V4__...sql`) instead. |
 | `release version 21 not supported` | Maven is running on an older JDK. Point `JAVA_HOME` to JDK 21. |
 | Registration says the email "could not be sent" | `MAIL_ENABLED=false`, or the SMTP login failed. Check the log for `Failed to send ... email`. For Gmail, use an **App Password** (see section 4). `535-5.7.8 Username and Password not accepted` means a normal password was used or 2-Step Verification is off. |
 | Startup log shows `SMTP check FAILED ... 534-5.7.14 Please log in via your web browser` | Google is holding the sign-in for a security check. Sign in to the Gmail account in a browser, approve any "Was this you?" or "Review security activity" prompt, then open https://accounts.google.com/DisplayUnlockCaptcha and click **Continue**. Retry within about 10 minutes. No restart is needed, because each email logs in again; the startup check only runs at startup. |
@@ -237,7 +245,8 @@ docs/            API, database and architecture documentation
 
 Results of the final pre-release audit (all run against this codebase, not assumed):
 
-- `mvn clean package`: **76 tests, 0 failures** across 10 test classes (H2 in MySQL mode).
+- `mvn clean package`: **81 tests, 0 failures** across 12 test classes (H2 in MySQL mode), including database file
+  storage and the Brevo email transport.
 - **MySQL 8.0.45 (MySQL80 Windows service):** Flyway applied `V1__init_schema.sql` and `V2__team_join_codes.sql`;
   Hibernate schema validation passed. Existing user data was fingerprinted before the audit and was identical after it.
 - **Live API suites on a separate instance against MySQL** (mail disabled, codes read from the log; all QA data removed
@@ -266,3 +275,26 @@ Known limitations (not reproduced, documented for future work):
 - Login lockout counters are in memory (single-instance deployment); bursts of parallel login attempts were not
   stress-tested.
 - The deadline reminder job is covered by an integration test, not observed live (it runs every 30 minutes).
+
+## 10. Deploying to Render (free tier)
+
+The repository includes a `Dockerfile` and a `render.yaml` Blueprint. The same jar runs locally and on Render; only
+environment variables differ. Render's free tier has no MySQL, no persistent disk and blocks outbound SMTP, so the
+deployment uses:
+
+| Need | Free service | Setting |
+|---|---|---|
+| MySQL 8 | [Aiven](https://aiven.io) free MySQL (1 GB) | `DB_URL=jdbc:mysql://<host>:<port>/defaultdb?sslMode=REQUIRED&serverTimezone=UTC&characterEncoding=UTF-8`, `DB_USERNAME`, `DB_PASSWORD` |
+| Email (OTP codes) | [Brevo](https://www.brevo.com) free API (300 emails/day) with a verified sender | `MAIL_TRANSPORT=brevo`, `BREVO_API_KEY`, `MAIL_FROM` |
+| Uploaded files | stored in MySQL | `STORAGE_TYPE=database`, uploads capped at 10 MB |
+
+Steps:
+
+1. Create the Aiven MySQL service and the Brevo account; verify the sender email in Brevo and create an API key.
+2. In Render choose **New → Blueprint**, select this repository and apply `render.yaml`.
+3. Enter the values Render asks for (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `BREVO_API_KEY`, `MAIL_FROM`,
+   `APP_BASE_URL`). `OTP_SECRET` is generated by Render. Never commit these values.
+4. Deploy. Flyway creates the schema on first start; the health check is `/api/auth/csrf`.
+
+Free-tier behaviour: the service sleeps after 15 minutes without traffic and takes about a minute to wake; signed-in
+sessions are kept in memory, so a restart signs users out (data and files are kept in MySQL). Run a single instance.

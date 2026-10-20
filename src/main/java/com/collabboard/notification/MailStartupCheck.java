@@ -36,6 +36,15 @@ public class MailStartupCheck implements ApplicationRunner {
         if (props.mail().logCodes()) {
             log.warn("MAIL_LOG_CODES is ignored while email delivery is enabled; codes are never logged.");
         }
+        if (EmailService.usesBrevo(props.mail())) {
+            // No SMTP connection on this transport; only check that the key is present (never log it).
+            if (props.mail().brevoApiKey() == null || props.mail().brevoApiKey().isBlank()) {
+                log.error("MAIL_TRANSPORT=brevo but BREVO_API_KEY is empty; emails cannot be sent.");
+            } else {
+                log.info("Email transport: Brevo HTTPS API, sender {}.", props.mail().from());
+            }
+            return;
+        }
         if (!(mailSender.getIfAvailable() instanceof JavaMailSenderImpl impl)) {
             log.error("Email delivery is enabled but no SMTP sender is configured.");
             return;
